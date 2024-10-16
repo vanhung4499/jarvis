@@ -13,35 +13,29 @@ import 'package:sign_in_button/sign_in_button.dart';
 
 class SignInScreen extends StatefulWidget {
   final SettingRepository setting;
-  final String? username;
+  final String? email;
 
-  const SignInScreen({super.key, required this.setting, this.username});
+  const SignInScreen({super.key, required this.setting, this.email});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  final phoneNumberValidator = RegExp(r"^1[3456789]\d{9}$");
-  final emailValidator = RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-
-  var agreeProtocol = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.username != null) {
-      _usernameController.text = widget.username!;
+    if (widget.email != null) {
+      _emailController.text = widget.email!;
     }
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -52,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: CustomSize.toolbarHeight,
+        backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(
             Icons.close,
@@ -104,7 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   padding: const EdgeInsets.only(
                       left: 15.0, right: 15.0, top: 15, bottom: 0),
                   child: TextFormField(
-                    controller: _usernameController,
+                    controller: _emailController,
                     inputFormatters: [
                       FilteringTextInputFormatter.singleLineFormatter
                     ],
@@ -123,7 +117,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       isDense: true,
                       floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelText: AppLocale.account.getString(context),
+                      labelText: AppLocale.email.getString(context),
                       labelStyle: const TextStyle(fontSize: 17),
                       hintText: AppLocale.accountInputTips.getString(context),
                       hintStyle: TextStyle(
@@ -175,7 +169,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           TextButton(
                             onPressed: () {
                               context.push(
-                                  '/retrieve-password?username=${_usernameController.text.trim()}');
+                                  '/forgot-password?email=${_emailController.text.trim()}');
                             },
                             child: Text(
                               AppLocale.forgotPassword.getString(context),
@@ -190,10 +184,10 @@ class _SignInScreenState extends State<SignInScreen> {
                               onPressed: () {
                                 context
                                     .push(
-                                        '/signup?username=${_usernameController.text.trim()}')
+                                        '/signup?email=${_emailController.text.trim()}')
                                     .then((value) {
                                   if (value != null) {
-                                    _usernameController.text = value as String;
+                                    _emailController.text = value as String;
                                   }
                                 });
                               },

@@ -422,7 +422,7 @@ mixin AppLocale {
     signInWithApple: 'Sign in with Apple',
     readAndAgree: 'Read and agree',
     andWord: 'and',
-    accountInputTips: 'Enter your phone number or email',
+    accountInputTips: 'Enter your email',
     phoneInputTips: 'Enter your phone number',
     passwordInputTips: 'Enter your password',
     pleaseReadAgreeProtocol:

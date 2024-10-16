@@ -5,26 +5,23 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jarvis/lang/lang.dart';
 import 'package:jarvis/page/component/background_container.dart';
-import 'package:jarvis/page/component/password_field.dart';
 import 'package:jarvis/page/component/theme/custom_size.dart';
 import 'package:jarvis/page/component/theme/custom_theme.dart';
 import 'package:jarvis/repo/setting_repo.dart';
 
-class SignupScreen extends StatefulWidget {
+class ForgotPasswordScreen extends StatefulWidget {
   final SettingRepository setting;
   final String? email;
 
-  const SignupScreen({super.key, required this.setting, this.email});
+  const ForgotPasswordScreen({super.key, required this.setting, this.email});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _verifyPasswordController =
-      TextEditingController();
 
   @override
   void initState() {
@@ -35,11 +32,10 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
-    _verifyPasswordController.dispose();
 
     super.dispose();
   }
@@ -53,12 +49,15 @@ class _SignupScreenState extends State<SignupScreen> {
         toolbarHeight: CustomSize.toolbarHeight,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: customColors.weakLinkColor,
+          ),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/login?email=${_emailController.text.trim()}');
+              context.go('/login');
             }
           },
         ),
@@ -114,10 +113,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: customColors.linkColor!),
+                          BorderSide(color: customColors.linkColor!),
                         ),
                         floatingLabelStyle:
-                            TextStyle(color: customColors.linkColor!),
+                        TextStyle(color: customColors.linkColor!),
                         isDense: true,
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: AppLocale.email.getString(context),
@@ -129,28 +128,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
-                  // Password
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 15.0, right: 15.0, top: 15, bottom: 0),
-                    child: PasswordField(
-                      controller: _passwordController,
-                      labelText: AppLocale.password.getString(context),
-                      hintText: AppLocale.passwordInputTips.getString(context),
-                    ),
-                  ),
-                  // Verify password
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 15.0, right: 15.0, top: 15, bottom: 0),
-                    child: PasswordField(
-                      controller: _verifyPasswordController,
-                      labelText: AppLocale.passwordConfirm.getString(context),
-                      hintText: AppLocale.passwordInputTips.getString(context),
-                    ),
-                  ),
                   const SizedBox(height: 15),
-                  // Signup button
                   Container(
                     height: 45,
                     width: double.infinity,
@@ -161,10 +139,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     child: TextButton(
                       onPressed: () {
-                        // context.go('/login');
+                        context.go('/verify-code');
                       },
                       child: Text(
-                        AppLocale.createAccount.getString(context),
+                        AppLocale.forgotPassword.getString(context),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -172,41 +150,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
-                  // Direct signin
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Column(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              if (context.canPop()) {
-                                context.pop(_emailController.text.trim());
-                              } else {
-                                context.go(
-                                    '/login?email=${_emailController.text.trim()}');
-                              }
-                            },
-                            child: Text(
-                              AppLocale.directSignin.getString(context),
-                              style: TextStyle(
-                                color: customColors.linkColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                    ]),
-                  ),
                 ],
               ),
             ),
           ),
         ),
       ),
+
     );
   }
 }

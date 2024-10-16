@@ -11,8 +11,11 @@ import 'package:jarvis/helper/logger.dart';
 import 'package:jarvis/helper/path.dart';
 import 'package:jarvis/helper/platform.dart';
 import 'package:jarvis/lang/lang.dart';
+import 'package:jarvis/page/auth/forgot_password.dart';
+import 'package:jarvis/page/auth/reset_password.dart';
 import 'package:jarvis/page/auth/signin_screen.dart';
 import 'package:jarvis/page/auth/signup_screen.dart';
+import 'package:jarvis/page/auth/verify_code.dart';
 import 'package:jarvis/page/component/theme/custom_theme.dart';
 import 'package:jarvis/page/component/theme/theme.dart';
 import 'package:jarvis/page/component/transition_resolver.dart';
@@ -62,16 +65,14 @@ void main() async {
   }
 
   // Database connection
-  final db = await databaseFactory.openDatabase(
-    'system.db',
-    options: OpenDatabaseOptions(
-      version: databaseVersion,
-      onCreate: initDatabase,
-      onOpen: (db) async {
-        Logger.instance.i('Database storage opened: ${db.path}');
-      },
-    )
-  );
+  final db = await databaseFactory.openDatabase('system.db',
+      options: OpenDatabaseOptions(
+        version: databaseVersion,
+        onCreate: initDatabase,
+        onOpen: (db) async {
+          Logger.instance.i('Database storage opened: ${db.path}');
+        },
+      ));
 
   // Loading setting
   final settingProvider = SettingDataProvider(db);
@@ -115,16 +116,40 @@ class MyApp extends StatefulWidget {
       routes: [
         GoRoute(
           path: '/login',
-          pageBuilder: (context, state) => transitionResolver(
-            SignInScreen(setting: settingRepo)
-          ),
+          pageBuilder: (context, state) =>
+              transitionResolver(SignInScreen(setting: settingRepo)),
         ),
         GoRoute(
           path: '/signup',
           pageBuilder: (context, state) => transitionResolver(
             SignupScreen(
               setting: settingRepo,
-              username: state.queryParameters['username'],
+              email: state.queryParameters['email'],
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/forgot-password',
+          pageBuilder: (context, state) => transitionResolver(
+            ForgotPasswordScreen(
+              setting: settingRepo,
+              email: state.queryParameters['email'],
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/reset-password',
+          pageBuilder: (context, state) => transitionResolver(
+            ResetPasswordScreen(
+              setting: settingRepo,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/verify-code',
+          pageBuilder: (context, state) => transitionResolver(
+            VerifyCodeScreen(
+              setting: settingRepo,
             ),
           ),
         ),
@@ -169,40 +194,38 @@ class _MyAppState extends State<MyApp> {
             create: (context) => widget.cacheRepo),
       ],
       child: ChangeNotifierProvider(
-        create: (context) => AppTheme.get()
-          ..mode = AppTheme.themeModeFormString(
-              widget.settingRepo.stringDefault(settingThemeMode, 'system')),
-      builder: (context, _) {
-        final appTheme = context.watch<AppTheme>();
-        return Sizer(
-          builder: (context, orientation, deviceType) {
-            return MaterialApp.router(
-              title: 'Jarvis',
-              themeMode: appTheme.mode,
-              theme: createLightThemeData(),
-              darkTheme: createDarkThemeData(),
-              debugShowCheckedModeBanner: false,
-              builder: (context, child) {
-                // The global font fixed size is set here and does not change with the system settings.
-                return MediaQuery(
-                  data: MediaQuery.of(context)
-                      .copyWith(textScaler: TextScaler.noScaling),
-                  child: BotToastInit()(context, child),
+          create: (context) => AppTheme.get()
+            ..mode = AppTheme.themeModeFormString(
+                widget.settingRepo.stringDefault(settingThemeMode, 'system')),
+          builder: (context, _) {
+            final appTheme = context.watch<AppTheme>();
+            return Sizer(
+              builder: (context, orientation, deviceType) {
+                return MaterialApp.router(
+                  title: 'Jarvis',
+                  themeMode: appTheme.mode,
+                  theme: createLightThemeData(),
+                  darkTheme: createDarkThemeData(),
+                  debugShowCheckedModeBanner: false,
+                  builder: (context, child) {
+                    // The global font fixed size is set here and does not change with the system settings.
+                    return MediaQuery(
+                      data: MediaQuery.of(context)
+                          .copyWith(textScaler: TextScaler.noScaling),
+                      child: BotToastInit()(context, child),
+                    );
+                  },
+                  routerConfig: widget._router,
+                  supportedLocales: widget.localization.supportedLocales,
+                  localizationsDelegates:
+                      widget.localization.localizationsDelegates,
                 );
               },
-              routerConfig: widget._router,
-              supportedLocales: widget.localization.supportedLocales,
-              localizationsDelegates: widget.localization.localizationsDelegates,
             );
-          },
-        );
-      }
-    ),
-
+          }),
     );
   }
 }
-
 
 ThemeData createLightThemeData() {
   return ThemeData.light(useMaterial3: true).copyWith(
@@ -214,10 +237,10 @@ ThemeData createLightThemeData() {
     ),
     iconButtonTheme: PlatformTool.isMacOS()
         ? IconButtonThemeData(
-      style: ButtonStyle(
-        overlayColor: WidgetStateProperty.all(Colors.transparent),
-      ),
-    )
+            style: ButtonStyle(
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
+            ),
+          )
         : null,
     dividerColor: Colors.transparent,
     dialogBackgroundColor: Colors.white,
@@ -246,10 +269,10 @@ ThemeData createDarkThemeData() {
     ),
     iconButtonTheme: PlatformTool.isMacOS()
         ? IconButtonThemeData(
-      style: ButtonStyle(
-        overlayColor: WidgetStateProperty.all(Colors.transparent),
-      ),
-    )
+            style: ButtonStyle(
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
+            ),
+          )
         : null,
     dividerColor: Colors.transparent,
     dialogBackgroundColor: const Color.fromARGB(255, 48, 48, 48),

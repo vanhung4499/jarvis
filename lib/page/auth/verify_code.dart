@@ -10,36 +10,26 @@ import 'package:jarvis/page/component/theme/custom_size.dart';
 import 'package:jarvis/page/component/theme/custom_theme.dart';
 import 'package:jarvis/repo/setting_repo.dart';
 
-class SignupScreen extends StatefulWidget {
+class VerifyCodeScreen extends StatefulWidget {
   final SettingRepository setting;
-  final String? email;
 
-  const SignupScreen({super.key, required this.setting, this.email});
+  const VerifyCodeScreen({super.key, required this.setting});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<VerifyCodeScreen> createState() => _VerifyCodeScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _verifyPasswordController =
-      TextEditingController();
+class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
+  final TextEditingController _codeController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
-    if (widget.email != null) {
-      _emailController.text = widget.email!;
-    }
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _verifyPasswordController.dispose();
+    _codeController.dispose();
 
     super.dispose();
   }
@@ -58,7 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/login?email=${_emailController.text.trim()}');
+              context.go('/login');
             }
           },
         ),
@@ -97,12 +87,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-                  // Username
+                  // Password
                   Padding(
                     padding: const EdgeInsets.only(
                         left: 15.0, right: 15.0, top: 15, bottom: 0),
                     child: TextFormField(
-                      controller: _emailController,
+                      controller: _codeController,
                       inputFormatters: [
                         FilteringTextInputFormatter.singleLineFormatter
                       ],
@@ -114,10 +104,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: customColors.linkColor!),
+                          BorderSide(color: customColors.linkColor!),
                         ),
                         floatingLabelStyle:
-                            TextStyle(color: customColors.linkColor!),
+                        TextStyle(color: customColors.linkColor!),
                         isDense: true,
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelText: AppLocale.email.getString(context),
@@ -129,28 +119,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
-                  // Password
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 15.0, right: 15.0, top: 15, bottom: 0),
-                    child: PasswordField(
-                      controller: _passwordController,
-                      labelText: AppLocale.password.getString(context),
-                      hintText: AppLocale.passwordInputTips.getString(context),
-                    ),
-                  ),
-                  // Verify password
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 15.0, right: 15.0, top: 15, bottom: 0),
-                    child: PasswordField(
-                      controller: _verifyPasswordController,
-                      labelText: AppLocale.passwordConfirm.getString(context),
-                      hintText: AppLocale.passwordInputTips.getString(context),
-                    ),
-                  ),
+
                   const SizedBox(height: 15),
-                  // Signup button
+                  // Verify button
                   Container(
                     height: 45,
                     width: double.infinity,
@@ -161,45 +132,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     child: TextButton(
                       onPressed: () {
-                        // context.go('/login');
+                        context.go('/reset-password');
                       },
                       child: Text(
-                        AppLocale.createAccount.getString(context),
+                        AppLocale.verifyCode.getString(context),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
                         ),
                       ),
                     ),
-                  ),
-                  // Direct signin
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Column(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              if (context.canPop()) {
-                                context.pop(_emailController.text.trim());
-                              } else {
-                                context.go(
-                                    '/login?email=${_emailController.text.trim()}');
-                              }
-                            },
-                            child: Text(
-                              AppLocale.directSignin.getString(context),
-                              style: TextStyle(
-                                color: customColors.linkColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                    ]),
                   ),
                 ],
               ),
