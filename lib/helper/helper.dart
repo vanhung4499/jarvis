@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:intl/intl.dart';
+import 'package:jarvis/lang/lang.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -43,4 +44,41 @@ Future<Uint8List> readTempFile(String path) async {
   final directory = await getTemporaryDirectory();
   final file = File('${directory.path}/$path');
   return await file.readAsBytes();
+}
+
+
+/// Convert time to human readable format
+String humanTime(DateTime? ts, {bool withTime = false}) {
+  if (ts == null || ts.millisecondsSinceEpoch == 0) {
+    return '';
+  }
+
+  var now = DateTime.now();
+  var diff = now.difference(ts);
+  if (diff.inDays > 0) {
+    if (withTime) {
+      return DateFormat('yyyy/MM/dd HH:mm').format(ts.toLocal());
+    }
+
+    return DateFormat('yyyy/MM/dd').format(ts.toLocal());
+  }
+
+  if (diff.inHours > 0) {
+    return '${diff.inHours} hours ago';
+  }
+
+  if (diff.inMinutes > 0) {
+    return '${diff.inMinutes} minutes ago';
+  }
+
+  return 'Just now';
+}
+
+/// Parse error message
+String resolveError(BuildContext context, Object error) {
+  if (error is LanguageText) {
+    return error.message.getString(context);
+  }
+
+  return error.toString();
 }

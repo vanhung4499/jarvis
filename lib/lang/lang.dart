@@ -414,6 +414,7 @@ mixin AppLocale {
     'Reference Image\n\nAI will create based on the reference image provided.',
     selectReferenceImage: 'Please select a reference image',
     random: 'Random',
+    followSystem: 'Follow System',
     darkThemeMode: 'Dark mode',
     lightThemeMode: 'Light mode',
     forgotPassword: 'Forgot password',

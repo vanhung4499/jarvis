@@ -11,16 +11,25 @@ import 'package:jarvis/helper/logger.dart';
 import 'package:jarvis/helper/path.dart';
 import 'package:jarvis/helper/platform.dart';
 import 'package:jarvis/lang/lang.dart';
+import 'package:jarvis/page/app_scaffold.dart';
 import 'package:jarvis/page/auth/forgot_password.dart';
 import 'package:jarvis/page/auth/reset_password.dart';
 import 'package:jarvis/page/auth/signin_screen.dart';
 import 'package:jarvis/page/auth/signup_screen.dart';
 import 'package:jarvis/page/auth/verify_code.dart';
+import 'package:jarvis/page/chat/chat_history.dart';
+import 'package:jarvis/page/chat/home.dart';
 import 'package:jarvis/page/component/theme/custom_theme.dart';
 import 'package:jarvis/page/component/theme/theme.dart';
 import 'package:jarvis/page/component/transition_resolver.dart';
+import 'package:jarvis/page/setting/account_security.dart';
+import 'package:jarvis/page/setting/setting_screen.dart';
 import 'package:jarvis/repo/cache_repo.dart';
+import 'package:jarvis/repo/chat_message_repo.dart';
 import 'package:jarvis/repo/data/cache_data.dart';
+import 'package:jarvis/repo/data/chat_history.dart';
+import 'package:jarvis/repo/data/chat_message_data.dart';
+import 'package:jarvis/repo/data/room_data.dart';
 import 'package:jarvis/repo/data/setting_data.dart';
 import 'package:jarvis/repo/setting_repo.dart';
 import 'package:path/path.dart';
@@ -82,9 +91,16 @@ void main() async {
   final settingRepo = SettingRepository(settingProvider);
   final cacheRepo = CacheRepository(CacheDataProvider(db));
 
+  final chatMsgRepo = ChatMessageRepository(
+    RoomDataProvider(db),
+    ChatMessageDataProvider(db),
+    ChatHistoryProvider(db),
+  );
+
   runApp(Phoenix(
     child: MyApp(
       settingRepo: settingRepo,
+      chatMsgRepo: chatMsgRepo,
       cacheRepo: cacheRepo,
     ),
   ));
@@ -101,6 +117,7 @@ class MyApp extends StatefulWidget {
   MyApp({
     super.key,
     required this.settingRepo,
+    required this.chatMsgRepo,
     required this.cacheRepo,
   }) {
     var apiServerToken = settingRepo.get(settingAPIServerToken);
@@ -114,6 +131,45 @@ class MyApp extends StatefulWidget {
       ],
       navigatorKey: _rootNavigatorKey,
       routes: [
+        StatefulShellRoute.indexedStack(
+          builder: (
+            BuildContext context,
+            GoRouterState state,
+            StatefulNavigationShell navigationShell,
+          ) {
+            return AppScaffold(
+              settingRepo: settingRepo,
+              navigationShell: navigationShell,
+            );
+          },
+          branches: [
+            StatefulShellBranch(
+              navigatorKey: _shellNavigatorKey,
+              routes: [
+                GoRoute(
+                  name: 'chat',
+                  path: '/',
+                  pageBuilder: (context, state) => transitionResolver(
+                    HomePage(
+                      setting: settingRepo,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: 'setting',
+                  path: '/setting',
+                  pageBuilder: (context, state) => transitionResolver(
+                    SettingScreen(settings: settingRepo),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         GoRoute(
           path: '/login',
           pageBuilder: (context, state) =>
@@ -153,11 +209,31 @@ class MyApp extends StatefulWidget {
             ),
           ),
         ),
+        GoRoute(
+          name: 'chat_history',
+          path: '/chat/history',
+          pageBuilder: (context, state) => transitionResolver(
+            ChatHistoryPage(
+              setting: settingRepo,
+              chatMessageRepo: chatMsgRepo,
+            ),
+          ),
+        ),
+        GoRoute(
+          name: 'account-security-setting',
+          path: '/setting/account-security',
+          pageBuilder: (context, state) => transitionResolver(
+            AccountSecurityScreen(
+              setting: context.read<SettingRepository>(),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   final SettingRepository settingRepo;
+  final ChatMessageRepository chatMsgRepo;
   final CacheRepository cacheRepo;
 
   @override
@@ -190,6 +266,8 @@ class _MyAppState extends State<MyApp> {
       providers: [
         RepositoryProvider<SettingRepository>(
             create: (context) => widget.settingRepo),
+        RepositoryProvider<ChatMessageRepository>(
+            create: (context) => widget.chatMsgRepo),
         RepositoryProvider<CacheRepository>(
             create: (context) => widget.cacheRepo),
       ],
